@@ -193,7 +193,7 @@ spec:
         name: my-scheduler-config
 ---
 
-#sample pod to use the custom scheduler
+#sample pod to schedule a pod using custom scheduler
 apiVersion: v1
 kind: Pod 
 metadata:
