@@ -1,0 +1,60 @@
+#sample certificateSigningRequest resource
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: akshay
+spec:
+  request: <base64 encoded csr contents>
+  usages:
+  - "client auth"
+  signerName: kubernetes.io/kube-apiserver-client
+  expirataionSeconds: 3600
+---
+
+#Sample networkPolicy to allow egress traffic from internal to payroll-service in payroll ns from port 32000-32678
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sample-np
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      role: internal
+  policyTypes:
+    - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          name: payroll-service
+      namespaceSelector:
+        matchLabels:
+          name: payroll
+    ports:
+    - protocol: TCP
+      port: 32000       
+      endPort: 32768
+---
+#scc inside contianer will override the pod scc and capabilities should always go inside containers
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sample-scc
+spec:
+  securityContext:
+    runAsUser: 1000
+  containers:
+  - name: sample-scc
+    image: gcr.io/google-samples/node-hello:1.0
+    resources:
+      limits:
+        cpu: "100m"
+        memory: "100Mi"
+    securityContext:
+      runAsUser: 2000
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: ["NET_ADMIN", "SYS_TIME"]
+---
+
